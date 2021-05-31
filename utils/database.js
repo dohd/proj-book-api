@@ -1,3 +1,4 @@
+require('dotenv');
 const { Sequelize, DataTypes, Op } = require('sequelize');
 
 // Initiate SQL database connection

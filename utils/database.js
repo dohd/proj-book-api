@@ -1,6 +1,9 @@
 const { Sequelize, DataTypes, Op } = require('sequelize');
 
-const {DB, DB_USERNAME, DB_PASSSWORD, DB_HOST} = process.env;
+const {
+    DB, DB_USERNAME, DB_PASSSWORD, 
+    DB_HOST, DB_PORT
+} = process.env;
 
 // Initiate SQL database connection
 const db = new Sequelize({
@@ -8,6 +11,7 @@ const db = new Sequelize({
     username: DB_USERNAME,
     password: DB_PASSSWORD,
     host: DB_HOST,
+    port: DB_PORT,
     dialect: 'postgres',
     dialectOptions: {
         ssl: {

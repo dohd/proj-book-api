@@ -1,5 +1,6 @@
-require('dotenv');
 const { Sequelize, DataTypes, Op } = require('sequelize');
+
+const {DB, DB_USERNAME, DB_PASSSWORD, DB_HOST} = process.env;
 
 // Initiate SQL database connection
 const db = new Sequelize({

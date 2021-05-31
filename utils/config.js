@@ -24,6 +24,7 @@ class Config {
         app.use(express.urlencoded({ extended: true }));
         // Parse cookies
         app.use(cookieParser());
+        app.use('/', (req, res) => res.send('route index'));
         // Allow cross-origin resource sharing
         app.use(cors(corsOptions));
     }

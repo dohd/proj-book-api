@@ -21,7 +21,7 @@ const { Sequelize, DataTypes, Op } = require('sequelize');
 //     }
 // });
 
-const db = new Sequelize(process.env.DATABASE_URL, {dialect: 'postgres'});
+const db = new Sequelize(process.env.DATABASE_URL, {dialect: 'postgres', native: true});
 
 // Confirm database connection
 db.authenticate()

@@ -1,0 +1,29 @@
+{
+  "name": "api",
+  "version": "1.0.0",
+  "description": "Proj-book api server",
+  "repository": "proj-book-api",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "author": "Dohd",
+  "license": "ISC",
+  "engines": {
+    "node": "12.x"
+  },
+  "dependencies": {
+    "bcrypt": "^5.0.0",
+    "cookie-parser": "^1.4.5",
+    "cors": "^2.8.5",
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "http-errors": "^1.8.0",
+    "jsonwebtoken": "^8.5.1",
+    "morgan": "^1.10.0",
+    "pg": "^8.4.1",
+    "pg-hstore": "^2.3.3",
+    "redis": "^3.0.2",
+    "sequelize": "^6.3.4"
+  }
+}

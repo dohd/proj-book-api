@@ -26,7 +26,6 @@ class Config {
         app.use(cookieParser());
         // Allow cross-origin resource sharing
         app.use(cors(corsOptions));
-        app.use('/', (req, res) => res.send('route index'));
     }
 
     use(...args) { return app.use(...args); }

@@ -9,6 +9,7 @@ const privateApiRoute = require('./routes');
 const app = new appConfig();
 
 // Routes
+app.use('/', (req, res) => res.send({ message: 'api index route'}));
 app.use('/api/auth', authRoute);
 app.use('/api', verifyAccessToken, privateApiRoute);
 

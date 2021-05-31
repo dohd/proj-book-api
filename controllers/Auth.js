@@ -1,7 +1,7 @@
 const createError = require('http-errors');
 const { db } = require('../utils/database');
 const { UniqueConstraintError } = require('sequelize');
-const redisClient = require('../utils/redis');
+// const redisClient = require('../utils/redis');
 const { 
     signAccessToken, signRefreshToken, 
     verifyRefreshToken
@@ -139,14 +139,16 @@ module.exports = {
 
             const accountId = await verifyRefreshToken(refreshToken);
             // Redis cache
-            redisClient.del(accountId, (err, value) => {
-                if (err) {
-                    console.log(err.message);
-                    throw new createError.InternalServerError();
-                }
-                console.log(value);
-                res.sendStatus(204);
-            });
+            // redisClient.del(accountId, (err, value) => {
+            //     if (err) {
+            //         console.log(err.message);
+            //         throw new createError.InternalServerError();
+            //     }
+            //     console.log(value);
+            //     res.sendStatus(204);
+            // });
+            console.log('accountId:',accountId);
+            res.sendStatus(204);
         } catch (error) {
             next(error);
         }

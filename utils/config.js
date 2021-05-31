@@ -31,7 +31,7 @@ class Config {
     use(...args) { return app.use(...args); }
     listen(...args) { return app.listen(...args); }
 
-    get port() { return process.env.PORT || 30001; }
+    get port() { return process.env.PORT || 3001; }
 }
 
 module.exports = Config;

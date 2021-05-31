@@ -8,7 +8,7 @@ const cors = require('cors');
 const app = express();
 const corsOptions = {
     origin: [
-        process.env.BROWSER_URI
+        process.env.CLIENT_URL
     ],
     maxAge: 86400,
     credentials: true

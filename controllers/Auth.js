@@ -86,13 +86,13 @@ module.exports = {
         try {
             const { email, password } = req.body;
 
-            if(!email || !password) throw new createError.NotFound(
+            if(!email || !password) throw new createError.Unauthorized(
                 'Email or password is required!'
             );            
             const login = await Login.findOne({ 
                 where: { email }, attributes: ['userId','password']
             });
-            if(!login) throw new createError.NotFound(
+            if(!login) throw new createError.Unauthorized(
                 'Email or password is invalid!'
             );
     

@@ -11,7 +11,7 @@ const app = new appConfig();
 // Routes
 app.use('/api/auth', authRoute);
 app.use('/api', verifyAccessToken, privateApiRoute);
-app.get('/', (req, res) => res.send({ message: 'api index route'}));
+app.getRoute('/', (req, res) => res.send('Api index-route test successful'));
 
 // Catch-all Route
 app.use((req, res, next) => {

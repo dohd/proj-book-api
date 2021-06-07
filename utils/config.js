@@ -1,5 +1,5 @@
 const express = require('express');
-// const httpLogger = require('morgan');
+const httpLogger = require('morgan');
 const cookieParser = require('cookie-parser');
 const cors = require('cors');
 
@@ -8,7 +8,7 @@ const app = express();
 class Config {
     constructor() {
         // Log http server requests
-        // app.use(httpLogger('dev'));
+        app.use(httpLogger('dev'));
         // Parse content-type - application/json
         app.use(express.json());
         // Parse content-type - application/x-www-form-urlencoded

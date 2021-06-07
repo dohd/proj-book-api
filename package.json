@@ -13,6 +13,7 @@
     "node": "12.x"
   },
   "dependencies": {
+    "morgan": "^1.10.0",
     "bcrypt": "^5.0.0",
     "cookie-parser": "^1.4.5",
     "cors": "^2.8.5",
@@ -28,7 +29,6 @@
     "pg-native": "^3.0.0"
   },
   "devDependencies": {
-    "morgan": "^1.10.0",
     "nodemon": "^2.0.7"
   }
 }

@@ -1,7 +1,10 @@
 const { Sequelize, DataTypes, Op } = require('sequelize');
 
 // Initiate SQL database connection
-const db = new Sequelize(process.env.PSQL_URI);
+const db = new Sequelize(process.env.DATABASE_URL, {
+    dialect: 'postgres',
+    native: true
+});
 
 // Confirm database connection
 db.authenticate()

@@ -1,6 +1,6 @@
 const JWT = require('jsonwebtoken');
 const createError = require('http-errors');
-const client = require('./redis');
+// const client = require('./redis');
 
 const accessToken = process.env.ACCESS_TOKEN_SECRET;
 const refreshToken = process.env.REFRESH_TOKEN_SECRET;
@@ -63,13 +63,14 @@ module.exports = {
                 reject(new createError.InternalServerError());
             }
             // Redis cache
-            client.set(user.accountId, token, 'EX', 365*24*60*60, (err,reply) => {
-                if (err) {
-                    console.log(err.message);
-                    reject(new createError.InternalServerError());
-                }    
-                resolve(token);
-            });  
+            // client.set(user.accountId, token, 'EX', 365*24*60*60, (err,reply) => {
+            //     if (err) {
+            //         console.log(err.message);
+            //         reject(new createError.InternalServerError());
+            //     }    
+            //     resolve(token);
+            // });  
+            resolve(token);
         });
     }),
     
@@ -79,14 +80,15 @@ module.exports = {
             if (err) reject(new createError.Unauthorized());
             const accountId = payload.aud;
             // Redis cache
-            client.get(accountId, (err,result) => {
-                if (err) {
-                    console.log(err.message);
-                    reject(new createError.InternalServerError());
-                }
-                if (token === result) resolve(accountId);
-                reject(new createError.Unauthorized());
-            });
+            // client.get(accountId, (err,result) => {
+            //     if (err) {
+            //         console.log(err.message);
+            //         reject(new createError.InternalServerError());
+            //     }
+            //     if (token === result) resolve(accountId);
+            //     reject(new createError.Unauthorized());
+            // });
+            resolve(accountId);
         });
     }),
 

@@ -122,6 +122,12 @@ module.exports = {
                                 attributes: ['id'],
                                 where: { status: 1 }               
                             }]
+                        },
+                        {
+                            model: Participant,
+                            as: 'participants',
+                            attributes: [],
+                            required: true
                         }
                     ]
                 });

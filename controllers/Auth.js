@@ -1,11 +1,14 @@
 const createError = require('http-errors');
-const { db } = require('../utils/database');
 const { UniqueConstraintError } = require('sequelize');
+
+const { db, Op } = require('../utils/database');
 const redisClient = require('../utils/redis');
+const sendMail = require('../utils/nodemailer');
 const { 
     signAccessToken, signRefreshToken, 
     verifyRefreshToken
 } = require('../utils/JWT');
+
 const Account = require('../models/Account');
 const User = require('../models/User');
 const Login = require('../models/Login');
@@ -157,15 +160,71 @@ module.exports = {
             const userId = req.payload.userId;
             const { password, newPassword } = req.body;
             
-            const login_match = await Login.findOne({
+            const login = await Login.findOne({
                 where: { userId },
-                attributes: ['password']
+                attributes: ['id','password']
             });
 
-            const isValid = await login_match.isValidPassword(password);
+            const isValid = await login.isValidPassword(password);
             if (!isValid) throw new createError.Unauthorized('Invalid password!');
 
-            await Login.update({ password: newPassword }, { where: { userId } });
+            login.password = newPassword;
+            await login.save();
+
+            res.sendStatus(200);
+        } catch (error) {
+            next(error);
+        }
+    },
+
+    recoverPassword: async (req, res, next) => {
+        try {
+            const { email } = req.body;
+
+            const user = await User.findOne({
+                where: { email }, attributes: ['id','username']
+            });
+            if (!user) throw new createError.Unauthorized('Invalid email!');
+
+            const login = await Login.findOne({
+                where: { userId: user.id },
+                attributes: ['id','passwordToken','tokenExp']
+            });
+
+            login.generateRecoveryToken();
+            await login.save();
+            await login.reload();
+
+            const link = `${process.env.CLIENT_URL}/reset-password/${login.passwordToken}`;
+            const messageId = await sendMail(user.username, email, link);
+            
+            res.send({messageId, email});
+        } catch (error) {
+            next(error);
+        }
+    },
+
+    recoveryPassword: async (req, res, next) => {
+        try {
+            const { confirm, password, passwordToken } = req.body;
+            if (confirm !== password) throw new createError.Unauthorized(
+                'Passwords do not match!'
+            );
+            
+            const login = await Login.findOne({
+                where: { 
+                    passwordToken, 
+                    tokenExp: { [Op.gt]: Date.now() } 
+                },
+                attributes: ['id','passwordToken','tokenExp','password']
+            });
+            if (!login) throw new createError.Unauthorized();
+
+            login.password = password;
+            login.passwordToken = null;
+            login.tokenExp = null;
+            await login.save();
+
             res.sendStatus(200);
         } catch (error) {
             next(error);

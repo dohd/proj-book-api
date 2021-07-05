@@ -11,46 +11,49 @@ module.exports = {
             const accountId = req.payload.aud;
             const { username, initial, email, roleId } = req.body;
 
-            const userMatch = await User.findOne({
+            const useExists = await User.findOne({
                 where: { username, email, accountId }, 
                 attributes: ['id']
             });
-            if (userMatch) throw new createError.Conflict(`User exists!`);
+            if (useExists) throw new createError.Conflict(`Username or email exists!`);
 
-            const initMatch = await User.findOne({
-                where: { initial, accountId }, attributes: ['id']
+            const userInitExists = await User.findOne({
+                where: { 
+                    accountId,
+                    initial: { [Op.iLike]: initial }
+                },
+                attributes: ['id']
             });
-            if (initMatch) throw new createError.Conflict(`Initial exists!`);
+            if (userInitExists) throw new createError.Conflict(`User initials exists!`);
 
-            const result = await db.transaction(async t => {
-                const transaction = t;
-
+            const result = await db.transaction(async transaction => {
+                // User
                 const user = await User.create({ 
                     username, initial, email, roleId, accountId 
                 }, {transaction});
-    
+                
+                // Account
                 const account = await Account.findByPk(user.accountId, { 
-                    attributes: ['domain'], transaction
+                    attributes: ['key','type'], transaction
                 });
-    
-                const loginEmail = `${user.initial}@${account.key}${account.type}`;
-                const login = await Login.create({
+                const accountEmail = `${user.initial}@${account.key}${account.type}`;
+
+                // Login
+                await Login.create({
                     accountId,
-                    email: loginEmail, 
-                    password: username, 
+                    email: accountEmail, 
+                    password: email,
                     userId: user.id,
-                }, {transaction});    
+                }, {transaction});
     
-                const saved_user = user.toJSON();
-                delete saved_user.accountId;
+                const savedUser = user.toJSON();
+                delete savedUser.accountId;
 
-                const saved_login = login.toJSON();
-                delete saved_login.userId;
-                delete saved_login.password;
-                delete saved_login.accountId;
-
-                return { user: saved_user, login: saved_login };
+                return savedUser;
             });
+
+            // Send Login credentials to the user's email
+
             res.send(result);
         } catch (err) {
             next(err);
@@ -60,12 +63,15 @@ module.exports = {
     findAll: async (req, res, next) => {
         try {
             const accountId = req.payload.aud;
-            const userId = req.payload.userId;
+            const { userId } = req.payload;
+
             const users = await User.findAll({
                 where: { accountId, id: { [Op.ne]: userId } }, 
-                attributes: { exclude: ['accountId','roleId','createdAt','updatedAt'] },
-                include: { model: Role, as: 'role' }
+                attributes: { exclude: ['accountId','createdAt'] },
+                order: [['updatedAt', 'DESC']],
+                include: { model: Role, as: 'role' },
             });
+
             res.send(users);
         } catch (err) {
             next(err);
@@ -78,36 +84,48 @@ module.exports = {
             const { id } = req.params;
             const { username, initial, email } = req.body;
 
-            const userMatch = await User.findOne({
-                where: { id: { [Op.ne]: id }, username, email, accountId }, 
+            const userExists = await User.findOne({
+                where: { 
+                    username, email, accountId,
+                    id: { [Op.ne]: id }
+                }, 
                 attributes: ['id']
             });
-            if (userMatch) throw new createError.Conflict(`User exists!`);
+            if (userExists) throw new createError.Conflict(`Username or email exists!`);
 
-            const initMatch = await User.findOne({
-                where: { id: { [Op.ne]: id }, initial, accountId },
+            const userInitExists = await User.findOne({
+                where: { 
+                    accountId,
+                    id: { [Op.ne]: id }, 
+                    initial: { [Op.iLike]: initial }
+                },
                 attributes: ['id']
             });
-            if (initMatch) throw new createError.Conflict(`Initial exists!`);
+            if (userInitExists) throw new createError.Conflict(`User initials exists!`);
             
-            await db.transaction(async t => {
-                const transaction = t;
-
-                await User.update(req.body, { where: { id, accountId }, transaction });
-
-                const account = await Account.findByPk(accountId, {
-                    attributes: ['key','type'], transaction 
+            await db.transaction(async transaction => {
+                // User
+                await User.update(req.body, { 
+                    where: { id, accountId }, transaction 
                 });
+
+                // User
                 const user = await User.findByPk(id, { 
                     attributes: ['initial','id'], transaction 
                 });
 
-                const loginEmail = `${user.initial}@${account.key}${account.type}`;
-                await Login.update({ email: loginEmail }, { 
+                // Account
+                const account = await Account.findByPk(accountId, {
+                    attributes: ['key','type'], transaction 
+                });
+                const accountEmail = `${user.initial}@${account.key}${account.type}`;
+
+                // Login
+                await Login.update({ email: accountEmail }, { 
                     where: { userId: user.id }, transaction 
                 });
-                return;
             });
+            
             res.sendStatus(200);
         } catch (err) {
             next(err);
@@ -116,10 +134,8 @@ module.exports = {
 
     delete: async (req, res, next) => {
         try {
-            const accountId = req.payload.aud;
             const { id } = req.params;
-            
-            await User.destroy({ where: { id, accountId } });
+            await User.destroy({ where: { id } });
             res.sendStatus(204);
         } catch (err) {
             next(err);

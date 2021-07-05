@@ -9,10 +9,10 @@ module.exports = {
             const image = await EventImage.create({
                 accountId, url, narrativeReportId
             });
-            const saved_image = image.toJSON();
-            delete saved_image.accountId;
+            const savedImage = image.toJSON();
+            delete savedImage.accountId;
 
-            res.send(saved_image);
+            res.send(savedImage);
         } catch (error) {
             next(error);
         }

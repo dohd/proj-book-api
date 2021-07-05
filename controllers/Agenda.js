@@ -63,9 +63,8 @@ module.exports = {
 
     delete: async (req, res, next) => {
         try {
-            const accountId = req.payload.aud;
             const { id } = req.params;
-            await Agenda.destroy({ where: { id, accountId } });
+            await Agenda.destroy({ where: { id } });
             res.sendStatus(204);
         } catch (err) {
             next(err);

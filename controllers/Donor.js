@@ -25,10 +25,10 @@ module.exports = {
             );
 
             const donor = await Donor.create({name, phone, email, accountId});
-            const saved_donor = donor.toJSON();
-            delete saved_donor.accountId;
+            const savedDonor = donor.toJSON();
+            delete savedDonor.accountId;
 
-            res.send(saved_donor);
+            res.send(savedDonor);
         } catch (err) {
             next(err);
         }
@@ -80,9 +80,8 @@ module.exports = {
 
     delete: async (req, res, next) => {
         try {
-            const accountId = req.payload.aud;
             const { id } = req.params;
-            await Donor.destroy({ where: { id, accountId } });
+            await Donor.destroy({ where: { id } });
             res.sendStatus(204);
         } catch (err) {
             if (err instanceof DatabaseError) {

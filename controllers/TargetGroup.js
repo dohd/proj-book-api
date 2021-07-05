@@ -74,9 +74,8 @@ module.exports = {
 
     delete: async (req, res, next) => {
         try {
-            const accountId = req.payload.aud;
             const { id } = req.params;
-            await TargetGroup.destroy({ where: { id, accountId } });
+            await TargetGroup.destroy({ where: { id } });
             res.sendStatus(204);
         } catch (error) {
             if (error instanceof DatabaseError) {

@@ -22,10 +22,10 @@ module.exports = {
             const programme = await KeyProgramme.create({ 
                 accountId, programme: req.body.programme 
             });
-            const saved_programme = programme.toJSON();
-            delete saved_programme.accountId;
+            const savedProgramme = programme.toJSON();
+            delete savedProgramme.accountId;
 
-            res.send(saved_programme);
+            res.send(savedProgramme);
         } catch (error) {
             next(error);
         }
@@ -74,9 +74,8 @@ module.exports = {
 
     delete: async (req, res, next) => {
         try {
-            const accountId = req.payload.aud;
             const { id } = req.params;
-            await KeyProgramme.destroy({ where: { id, accountId } });
+            await KeyProgramme.destroy({ where: { id } });
             res.sendStatus(204);
         } catch (error) {
             if (error instanceof DatabaseError) {

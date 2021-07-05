@@ -40,8 +40,7 @@ module.exports = {
                 lName: data.lName,
             };
 
-            await db.transaction(async t => {
-                const transaction = t;
+            await db.transaction(async transaction => {
                 await Detail.update(detail, { where: { accountId }, transaction });
                 await ContactPerson.update(person, { where: { accountId }, transaction });
                 return;

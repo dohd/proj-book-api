@@ -12,8 +12,7 @@ module.exports = {
             const accountId = req.payload.aud;
             const { activityId, caseStudy, responses } = req.body;
 
-            const result = await db.transaction(async t => {
-                const transaction = t;
+            const result = await db.transaction(async transaction => {
 
                 const report = await NarrativeReport.create({
                     accountId, activityId, 
@@ -31,18 +30,18 @@ module.exports = {
                 });
                 await Response.bulkCreate(report_responses, {transaction});
 
-                const saved_response = await Response.findAll({
+                const savedResponse = await Response.findAll({
                     where: { narrativeReportId: report.id },
                     attributes: { exclude: ['accountId'] },
                     transaction
                 });
 
-                const saved_caseStudy = case_study.toJSON();
-                delete saved_caseStudy.accountId;
+                const savedCaseStudy = case_study.toJSON();
+                delete savedCaseStudy.accountId;
 
                 return {
-                    caseStudy: saved_caseStudy,
-                    responses: saved_response,
+                    caseStudy: savedCaseStudy,
+                    responses: savedResponse,
                 };
             });
 
@@ -105,9 +104,8 @@ module.exports = {
 
     delete: async (req, res, next) => {
         try {
-            const accountId = req.payload.aud;
             const { id } = req.params;
-            await NarrativeReport.destroy({ where: { id, accountId } });
+            await NarrativeReport.destroy({ where: { id } });
             res.sendStatus(204);
         } catch (error) {
             next(error);

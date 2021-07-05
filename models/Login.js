@@ -16,9 +16,8 @@ const Login = db.define('login', {
 });
 
 // Hooks
-Login.afterValidate(async (login, options) => {
+Login.beforeSave(async (login, options) => {
     try {
-        if (!login.password) return;
         const salt = await bcrypt.genSalt(10);
         const hash = await bcrypt.hash(login.password, salt);
         login.password = hash;

@@ -9,10 +9,10 @@ module.exports = {
             const activity = await Activity.create({ 
                 action, objectiveId, accountId 
             });
-            const saved_activity = activity.toJSON();
-            delete saved_activity.accountId;
+            const savedActivity = activity.toJSON();
+            delete savedActivity.accountId;
 
-            res.send(saved_activity);
+            res.send(savedActivity);
         } catch (err) {
             next(err);
         }
@@ -44,9 +44,8 @@ module.exports = {
 
     delete: async (req, res, next) => {
         try {
-            const accountId = req.payload.aud;
             const { id } = req.params;
-            await Activity.destroy({ where: { id, accountId } });
+            await Activity.destroy({ where: { id } });
             res.sendStatus(204);
         } catch (err) {
             next(err);

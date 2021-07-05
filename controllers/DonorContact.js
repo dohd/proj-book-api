@@ -16,9 +16,9 @@ module.exports = {
                 accountId
             });
 
-            const saved_donor_contact = donor_contact.toJSON();
-            delete saved_donor_contact.accountId;
-            res.send(saved_donor_contact);
+            const savedDonor_contact = donor_contact.toJSON();
+            delete savedDonor_contact.accountId;
+            res.send(savedDonor_contact);
         } catch (error) {
             next(error);
         }
@@ -56,9 +56,8 @@ module.exports = {
 
     delete: async (req, res, next) => {
         try {
-            const accountId = req.payload.aud;
             const { id } = req.params;
-            await DonorContact.destroy({ where: { id, accountId } });
+            await DonorContact.destroy({ where: { id } });
             res.sendStatus(204);
         } catch (err) {
             next(err);

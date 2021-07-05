@@ -16,8 +16,7 @@ module.exports = {
             const accountId = req.payload.aud;
             const data = req.body;
 
-            const result = await db.transaction(async t => {
-                const transaction = t;
+            const result = await db.transaction(async transaction => {
 
                 const plan = await ActivityPlan.create({ 
                     accountId, 
@@ -49,14 +48,14 @@ module.exports = {
                 }));
                 await PlanEvent.bulkCreate(dates, {transaction});
 
-                const saved_events = await PlanEvent.findAll({
+                const savedEvents = await PlanEvent.findAll({
                     where: { activityPlanId: plan.id }, 
                     attributes: ['id','date'],
                     transaction
                 });
 
                 const regions = [];
-                saved_events.forEach((obj, i) => {
+                savedEvents.forEach((obj, i) => {
                     const event = data.events[i];
                     event.regions.forEach(regionId => {
                         regions.push({ accountId, regionId, planEventId: obj.id });
@@ -64,30 +63,30 @@ module.exports = {
                 });
                 await PlanRegion.bulkCreate(regions, {transaction});
 
-                const eventIds = saved_events.map(({id}) => id);
-                const saved_regions = await PlanRegion.findAll({ 
+                const eventIds = savedEvents.map(({id}) => id);
+                const savedRegions = await PlanRegion.findAll({ 
                     where: { planEventId: eventIds }, 
                     attributes: { exclude: ['accountId'] }, 
                     transaction 
                 });
-                const saved_groups = await PlanGroup.findAll({ 
+                const savedGroups = await PlanGroup.findAll({ 
                     where: { activityPlanId: plan.id }, 
                     attributes: { exclude: ['accountId'] }, 
                     transaction
                 });
 
-                const saved_material = material.toJSON();
-                const saved_programme = programme.toJSON();
+                const savedMaterial = material.toJSON();
+                const savedProgramme = programme.toJSON();
 
-                delete saved_material.accountId;
-                delete saved_programme.accountId;
+                delete savedMaterial.accountId;
+                delete savedProgramme.accountId;
 
                 return { 
-                    planProgramme: saved_programme,
-                    planMaterial: saved_material, 
-                    planRegions: saved_regions,
-                    planEvents: saved_events,
-                    planGroups: saved_groups
+                    planProgramme: savedProgramme,
+                    planMaterial: savedMaterial, 
+                    planRegions: savedRegions,
+                    planEvents: savedEvents,
+                    planGroups: savedGroups
                 };
             });
 
@@ -160,7 +159,6 @@ module.exports = {
 
     delete: async (req, res, next) => {
         try {
-            const accountId = req.payload.aud;
             const { id } = req.params;
 
             const plan = await ActivityPlan.findByPk(id, {
@@ -174,7 +172,7 @@ module.exports = {
             if (participant) throw new createError.FailedDependency(
                 'Plan has a participant dependency'
             );
-            await ActivityPlan.destroy({ where: { id, accountId } });
+            await ActivityPlan.destroy({ where: { id } });
             res.sendStatus(204);
         } catch (error) {
             next(error);

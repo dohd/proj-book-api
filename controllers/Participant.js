@@ -48,11 +48,11 @@ module.exports = {
                     designation: data.designation
                 }, {transaction});
 
-                const saved_participant = participant.toJSON();
-                saved_participant.detail = detail.toJSON();
-                delete saved_participant.accountId;
+                const savedParticipant = participant.toJSON();
+                savedParticipant.detail = detail.toJSON();
+                delete savedParticipant.accountId;
 
-                return saved_participant;
+                return savedParticipant;
             });
 
             res.send(result);

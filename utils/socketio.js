@@ -2,6 +2,8 @@ const { Server } = require('socket.io');
 const { verifySocketToken } = require('./JWT');
 
 const socketEvents = [
+    'orgProfile',
+    'profileImage',
     'pendingReports',
     'pendingParticipants',
     'pendingPlans',
@@ -25,11 +27,12 @@ const socketEvents = [
 
 // accounts should be persisted on redis-db 
 const accounts = [];
+
 module.exports = function(server) {
     // Initialize socket
     const io = new Server(server, {
         cors: {
-            origin: process.env.CLIENT_SOCKET_URL,
+            origin: process.env.CLIENT_URL,
             methods: ['GET','POST'],
             credentials: true
         }
@@ -38,6 +41,8 @@ module.exports = function(server) {
     
     io.on('connection', socketConnected);
     function socketConnected(socket) {
+        console.log('Socket connected id: ' + socket.id);
+
         socket.on('init', aud => {
             accounts.push({[aud]: socket.id});
         });

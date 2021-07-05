@@ -10,10 +10,10 @@ module.exports = {
                 accountId, proposalId,
                 objective: req.body.objective
             });
-            const saved_objective = objective.toJSON();
-            delete saved_objective.accountId;
+            const savedObjective = objective.toJSON();
+            delete savedObjective.accountId;
 
-            res.send(saved_objective);
+            res.send(savedObjective);
         } catch (err) {
             next(err);
         }
@@ -48,9 +48,8 @@ module.exports = {
 
     delete: async (req, res, next) => {
         try {
-            const accountId = req.payload.aud;
             const { id } = req.params;
-            await Objective.destroy({ where: { id, accountId } });
+            await Objective.destroy({ where: { id } });
             res.sendStatus(204);
         } catch (err) {
             next(err);

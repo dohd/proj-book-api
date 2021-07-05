@@ -13,10 +13,10 @@ module.exports = {
             }
 
             const image = await ProfileImage.create({ accountId, url });
-            const saved_image = image.toJSON();
-            delete saved_image.accountId;
+            const savedImage = image.toJSON();
+            delete savedImage.accountId;
 
-            res.send(saved_image);
+            res.send(savedImage);
         } catch (error) {
             next(error);
         }

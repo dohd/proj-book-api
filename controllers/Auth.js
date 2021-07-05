@@ -20,28 +20,35 @@ module.exports = {
         try {
             const data = req.body;
 
-            const result = await db.transaction(async t => {
-                const transaction = t;
+            const result = await db.transaction(async transaction => {
                 // Account
                 const account = await Account.create({ 
                     name: data.orgName,
-                    key: data.keyName
+                    key: data.keyName.replace(/\s/g, '') //filter all white spaces
                 }, {transaction});
 
+                const username = data.username.split(' ');
+                const initial = `${username[0][0]}.${username[1]}`;
+
                 // User
-                let names = data.username.split(' ');
-                const initial = `${names[0][0]}.${names[1]}`;
-                // roleId = 1 for Admin
                 const user = await User.create({
                     initial,
                     username: data.username,
                     email: data.email,
-                    roleId: 1,
+                    roleId: 1, //admin
                     accountId: account.id
                 }, {transaction});
 
-                // Org profile
-                const detail = await Detail.create({
+                const accountEmail = `${user.initial}@${account.key}${account.type}`;
+                // Login
+                await Login.create({
+                    email: accountEmail,
+                    password: data.password,
+                    userId: user.id,
+                }, {transaction});
+
+                // Detail (Org profile)
+                await Detail.create({
                     name: data.orgName,
                     telephone: data.orgTelephone,
                     email: data.orgEmail,
@@ -49,27 +56,19 @@ module.exports = {
                 }, {transaction});
                 
                 // Contact person
-                names = data.name.split(' ');
-                const person = await ContactPerson.create({
+                const name = data.name.split(' ');
+                await ContactPerson.create({
                     telephone: data.cpTelephone,
                     email: data.cpEmail,
-                    fName: names[0],
-                    lName: names[1],
+                    fName: name[0],
+                    lName: name[1],
                     accountId: account.id
-                }, {transaction});
-
-                // Login
-                const email = `${user.initial}@${account.key}${account.type}`;
-                const login = await Login.create({
-                    email,
-                    password: data.password,
-                    userId: user.id,
                 }, {transaction});
                 
                 const accessToken = await signAccessToken(user);
                 const refreshToken = await signRefreshToken(user);
 
-                return { accessToken, refreshToken, detail, person, login };
+                return { accessToken, refreshToken };
             });
             
             const { accessToken, refreshToken } = result;
@@ -78,7 +77,7 @@ module.exports = {
         } catch (error) {
             if (error instanceof UniqueConstraintError) {
                 const errItem = error.errors[0];
-                const msg = `${errItem.value} already exists`;
+                const msg = `${errItem.value} already exists!`;
                 return next(new createError.UnprocessableEntity(msg));
             }
             next(error);
@@ -88,10 +87,11 @@ module.exports = {
     login: async (req, res, next) => {
         try {
             const { email, password } = req.body;
-
             if(!email || !password) throw new createError.Unauthorized(
                 'Email or password is required!'
-            );            
+            ); 
+            
+            // Login
             const login = await Login.findOne({ 
                 where: { email }, attributes: ['userId','password']
             });
@@ -104,6 +104,7 @@ module.exports = {
                 'Email or password is invalid!'
             );
 
+            // User
             const user = await User.findByPk(login.userId, { 
                 attributes: ['accountId','id','roleId'],
             });
@@ -157,9 +158,9 @@ module.exports = {
 
     resetPassword: async (req, res, next) => {
         try {
-            const userId = req.payload.userId;
-            const { password, newPassword } = req.body;
-            
+            const { userId } = req.payload;
+            const { password, newPassword } = req.body; 
+
             const login = await Login.findOne({
                 where: { userId },
                 attributes: ['id','password']

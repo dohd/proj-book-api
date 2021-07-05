@@ -10,8 +10,7 @@ module.exports = {
             const accountId = req.payload.aud;
             const data = req.body;
 
-            const result = await db.transaction(async t => {
-                const transaction = t;
+            const result = await db.transaction(async transaction => {
                 // Proposal
                 const proposal = await Proposal.create({
                     accountId,
@@ -28,7 +27,7 @@ module.exports = {
                     return { proposalId: proposal.id, objective, accountId };
                 });
                 await Objective.bulkCreate(objectives, {transaction});
-                const saved_objectives = await Objective.findAll({
+                const savedObjectives = await Objective.findAll({
                     where: { proposalId: proposal.id },
                     attributes: ['id','objective'],
                     transaction
@@ -36,7 +35,7 @@ module.exports = {
                 
                 // Activities
                 const activities = [];
-                saved_objectives.forEach((obj, i) => {
+                savedObjectives.forEach((obj, i) => {
                     const objective = data.objectives[i];
                     objective.activities.forEach(action => {
                         activities.push({ objectiveId: obj.id, action, accountId });
@@ -44,20 +43,20 @@ module.exports = {
                 });
                 await Activity.bulkCreate(activities, {transaction});
     
-                const objectiveIds = saved_objectives.map(({id}) => id);
-                const saved_activities = await Activity.findAll({
+                const objectiveIds = savedObjectives.map(({id}) => id);
+                const savedActivities = await Activity.findAll({
                     where: { objectiveId: objectiveIds },
                     attributes: ['id','action'],
                     transaction
                 });
 
-                const saved_proposal = proposal.toJSON();
-                delete saved_proposal.accountId;
+                const savedProposal = proposal.toJSON();
+                delete savedProposal.accountId;
 
                 return {
-                    proposal: saved_proposal, 
-                    objectives: saved_objectives,
-                    activities: saved_activities
+                    proposal: savedProposal, 
+                    objectives: savedObjectives,
+                    activities: savedActivities
                 };
             });
             res.send(result);
@@ -110,9 +109,8 @@ module.exports = {
 
     delete: async (req, res, next) => {
         try {
-            const accountId = req.payload.aud;
             const { id } = req.params;
-            await Proposal.destroy({ where: { id, accountId } });
+            await Proposal.destroy({ where: { id } });
             res.sendStatus(204);
         } catch (error) {
             next(error);

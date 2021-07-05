@@ -20,10 +20,10 @@ module.exports = {
             );
 
             const region = await Region.create({ area, accountId });
-            const saved_region = region.toJSON();
-            delete saved_region.accountId;
+            const savedRegion = region.toJSON();
+            delete savedRegion.accountId;
 
-            res.send(saved_region);
+            res.send(savedRegion);
         } catch (error) {
             next(error);
         }
@@ -71,9 +71,8 @@ module.exports = {
 
     delete: async (req, res, next) => {
         try {
-            const accountId = req.payload.aud;
             const { id } = req.params;
-            await Region.destroy({ where: { id, accountId } });
+            await Region.destroy({ where: { id } });
             res.sendStatus(204);
         } catch (error) {
             if (error instanceof DatabaseError) {

@@ -5,7 +5,8 @@
   "repository": "proj-book-api",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "start-dev": "NODE_ENV=development nodemon server.js"
   },
   "author": "Dohd",
   "license": "ISC",

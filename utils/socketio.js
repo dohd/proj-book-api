@@ -29,10 +29,18 @@ const socketEvents = [
 const accounts = [];
 
 module.exports = function(server) {
+    let origin;
+    if (process.env.NODE_ENV === 'development') {
+        origin = process.env.DEV_CLIENT_URL;
+    }
+    if (process.env.NODE_ENV === 'production') {
+        origin = process.env.CLIENT_SOCKET_URL;
+    }
+
     // Initialize socket
     const io = new Server(server, {
         cors: {
-            origin: process.env.CLIENT_URL,
+            origin: origin,
             methods: ['GET','POST'],
             credentials: true
         }

@@ -30,7 +30,7 @@ app.use((err, req, res, next) => {
 });
 
 // Server instance
-const port = process.env.PORT
+const port = process.env.PORT || 3001;
 const server = app.listen(port, () => {
     console.log('Server ready on port:', port);
 });

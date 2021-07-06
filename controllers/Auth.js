@@ -2,12 +2,12 @@ const createError = require('http-errors');
 const { UniqueConstraintError } = require('sequelize');
 
 const { db, Op } = require('../utils/database');
-const redisClient = require('../utils/redis');
 const sendMail = require('../utils/sendMail');
 const { 
     signAccessToken, signRefreshToken, 
     verifyRefreshToken
 } = require('../utils/JWT');
+// const redisClient = require('../utils/redis');
 
 const Account = require('../models/Account');
 const User = require('../models/User');
@@ -221,20 +221,20 @@ module.exports = {
         }
     },
 
-    // refreshToken: async (req, res, next) => {
-    //     try {
-    //         const token  = req.cookies.refreshToken;
-    //         if (!token) throw new createError.BadRequest();
+    refreshToken: async (req, res, next) => {
+        try {
+            const token  = req.cookies.refreshToken;
+            if (!token) throw new createError.BadRequest();
 
-    //         const userId = await verifyRefreshToken(token);
+            const userId = await verifyRefreshToken(token);
             
-    //         const accessToken = await signAccessToken(userId);
-    //         const refreshToken = await signRefreshToken(userId);
+            const accessToken = await signAccessToken(userId);
+            const refreshToken = await signRefreshToken(userId);
 
-    //         res.cookie('refreshToken', refreshToken, { httpOnly: true });
-    //         res.send({ accessToken });
-    //     } catch (err) {
-    //         next(err);
-    //     }
-    // },
+            res.cookie('refreshToken', refreshToken, { httpOnly: true });
+            res.send({ accessToken });
+        } catch (err) {
+            next(err);
+        }
+    },
 };

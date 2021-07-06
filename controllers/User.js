@@ -1,5 +1,8 @@
-const { db, Op } = require('../utils/database');
 const createError = require('http-errors');
+
+const { db, Op } = require('../utils/database');
+const sendMail = require('../utils/sendMail');
+
 const User = require('../models/User');
 const Account = require('../models/Account');
 const Login = require('../models/Login');
@@ -39,7 +42,7 @@ module.exports = {
                 const accountEmail = `${user.initial}@${account.key}${account.type}`;
 
                 // Login
-                await Login.create({
+                const login = await Login.create({
                     accountId,
                     email: accountEmail, 
                     password: email,
@@ -49,12 +52,19 @@ module.exports = {
                 const savedUser = user.toJSON();
                 delete savedUser.accountId;
 
-                return savedUser;
+                const credentials = {
+                    username: user.username,
+                    email: login.email,
+                    password: user.email,
+                };
+
+                return { credentials, email: user.email };
             });
 
-            // Send Login credentials to the user's email
-
-            res.send(result);
+            const { credentials } = result;
+            const messageId = sendMail.loginCredentials(credentials, result.email);
+            
+            res.send({ messageId, email });
         } catch (err) {
             next(err);
         }

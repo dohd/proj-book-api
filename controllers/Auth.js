@@ -3,7 +3,7 @@ const { UniqueConstraintError } = require('sequelize');
 
 const { db, Op } = require('../utils/database');
 const redisClient = require('../utils/redis');
-const sendMail = require('../utils/nodemailer');
+const sendMail = require('../utils/sendMail');
 const { 
     signAccessToken, signRefreshToken, 
     verifyRefreshToken
@@ -41,7 +41,7 @@ module.exports = {
 
                 const accountEmail = `${user.initial}@${account.key}${account.type}`;
                 // Login
-                await Login.create({
+                const login = await Login.create({
                     email: accountEmail,
                     password: data.password,
                     userId: user.id,
@@ -64,16 +64,20 @@ module.exports = {
                     lName: name[1],
                     accountId: account.id
                 }, {transaction});
-                
-                const accessToken = await signAccessToken(user);
-                const refreshToken = await signRefreshToken(user);
 
-                return { accessToken, refreshToken };
+                const credentials = { 
+                    username: user.username,
+                    email: login.email,
+                    password: data.password
+                }
+                
+                return { credentials, email: user.email };
             });
+
+            const { credentials, email } = result;
+            const messageId = sendMail.loginCredentials(credentials, email);
             
-            const { accessToken, refreshToken } = result;
-            res.cookie('refreshToken', refreshToken, { httpOnly: true });
-            res.send({ accessToken });
+            res.send({ messageId, email });
         } catch (error) {
             if (error instanceof UniqueConstraintError) {
                 const errItem = error.errors[0];
@@ -197,7 +201,7 @@ module.exports = {
             await login.reload();
 
             const link = `${process.env.CLIENT_URL}/reset-password/${login.passwordToken}`;
-            const messageId = await sendMail(user.username, email, link);
+            const messageId = await sendMail.passwordResetLink(user.username, email, link);
             
             res.send({messageId, email});
         } catch (error) {

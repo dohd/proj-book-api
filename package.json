@@ -6,7 +6,7 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "start-dev": "NODE_ENV=development nodemon server.js"
+    "start-dev": "nodemon server.js"
   },
   "author": "Dohd",
   "license": "ISC",

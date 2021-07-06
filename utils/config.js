@@ -5,15 +5,6 @@ const cors = require('cors');
 
 // Initiate express app server
 const app = express();
-
-let origin;
-if (process.env.NODE_ENV === 'development') {
-    origin = process.env.DEV_CLIENT_URL;
-}
-if (process.env.NODE_ENV === 'production') {
-    origin = process.env.CLIENT_URL;
-}
-
 class Config {
     constructor() {
         // Log http server requests
@@ -26,7 +17,7 @@ class Config {
         app.use(cookieParser());
         // Allow cross-origin resource sharing
         app.use(cors({
-            origin: origin,
+            origin: process.env.CLIENT_URL,
             maxAge: 86400,
             credentials: true
         }));

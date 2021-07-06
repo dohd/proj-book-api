@@ -1,16 +1,14 @@
 const { Sequelize, DataTypes, Op } = require('sequelize');
 
 // Initiate database connection
-let db;
-if (process.env.NODE_ENV === 'development') {
-    db = new Sequelize(process.env.DEV_DATABASE_URL);
-}
-if (process.env.NODE_ENV === 'production') {
-    db = new Sequelize(process.env.DATABASE_URL, {
+const db = (
+    process.env.NODE_ENV === 'production' ?
+    new Sequelize(process.env.DATABASE_URL, {
         dialect: 'postgres',
         native: true
-    }); 
-}
+    }): 
+    new Sequelize(process.env.DATABASE_URL)
+);
 
 // Confirm database connection
 db.authenticate()

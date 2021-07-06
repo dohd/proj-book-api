@@ -123,23 +123,6 @@ module.exports = {
         }
     },
 
-    refreshToken: async (req, res, next) => {
-        try {
-            const token  = req.cookies.refreshToken;
-            if (!token) throw new createError.BadRequest();
-
-            const accountId = await verifyRefreshToken(token);
-            
-            const accessToken = await signAccessToken(accountId);
-            const refreshToken = await signRefreshToken(accountId);
-
-            res.cookie('refreshToken', refreshToken, { httpOnly: true });
-            res.send({ accessToken });
-        } catch (err) {
-            next(err);
-        }
-    },
-
     logout: async (req, res, next) => {
         try {
             const { refreshToken } = req.cookies;
@@ -147,14 +130,16 @@ module.exports = {
 
             const accountId = await verifyRefreshToken(refreshToken);
             // Redis cache
-            redisClient.del(accountId, (err, value) => {
-                if (err) {
-                    console.log(err.message);
-                    throw new createError.InternalServerError();
-                }
-                console.log(value);
-                res.sendStatus(204);
-            });
+            // redisClient.del(accountId, (err, value) => {
+            //     if (err) {
+            //         console.log(err.message);
+            //         throw new createError.InternalServerError();
+            //     }
+            //     console.log(value);
+            //     res.sendStatus(204);
+            // });
+            console.log('Logout accountId: '+ accountId);
+            res.sendStatus(204);
         } catch (error) {
             next(error);
         }
@@ -234,5 +219,22 @@ module.exports = {
         } catch (error) {
             next(error);
         }
-    }
+    },
+
+    // refreshToken: async (req, res, next) => {
+    //     try {
+    //         const token  = req.cookies.refreshToken;
+    //         if (!token) throw new createError.BadRequest();
+
+    //         const userId = await verifyRefreshToken(token);
+            
+    //         const accessToken = await signAccessToken(userId);
+    //         const refreshToken = await signRefreshToken(userId);
+
+    //         res.cookie('refreshToken', refreshToken, { httpOnly: true });
+    //         res.send({ accessToken });
+    //     } catch (err) {
+    //         next(err);
+    //     }
+    // },
 };

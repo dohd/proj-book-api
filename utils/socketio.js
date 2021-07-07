@@ -49,10 +49,20 @@ module.exports = function(server) {
         socketEvents.forEach(event => {
             socket.on(event, ({aud, data}) => {
                 accounts.forEach(account => {
-                    let id = account[aud];
+                    const id = account[aud];
                     if (id) io.to(id).emit(event, data);
                 });
             });
-        });    
+        });
+        
+        socket.on('disconnect', () => {
+            for (let i=0; i<accounts.length; i++) {
+                const socketId = Object.values(accounts[i])[0];
+                if (socketId === socket.id) {
+                    accounts.splice(i, 1);
+                    break;
+                }
+            }
+        });
     });
 }

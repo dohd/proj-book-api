@@ -35,9 +35,11 @@ module.exports = {
             from: 'no-reply@projbook.com',
             to: email,
             subject: 'Password Reset',
+
             text: `Hi ${username},
             \rClick on the following link ${link} to reset your password.
-            \rIgnore this email if you wish to make no changes.`,                    
+            \rIgnore this email if you wish to make no changes.`,
+                                
             html:`Hi <b>${username}</b>, 
             <p>Click on the following link <a href=${link}>${link}</a> 
             to reset your password.</p>

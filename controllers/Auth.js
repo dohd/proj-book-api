@@ -116,7 +116,11 @@ module.exports = {
             const accessToken = await signAccessToken(user);
             const refreshToken = await signRefreshToken(user);
 
-            res.cookie('refreshToken', refreshToken, { httpOnly: true });
+            res.cookie('refreshToken', refreshToken, { 
+                httpOnly: true,
+                secure: true,
+                sameSite: 'none' 
+            });
             res.send({ accessToken });
         } catch (err) {
             next(err);

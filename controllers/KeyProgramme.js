@@ -7,22 +7,23 @@ module.exports = {
     create: async (req, res, next) => {
         try {
             const accountId = req.payload.aud;
+            const { programme } = req.body
 
-            const programme_match = await KeyProgramme.findOne({
+            const programmeMatch = await KeyProgramme.findOne({
                 attributes: ['id'],
                 where: {
                     accountId,
-                    programme: { [Op.iLike]: req.body.programme }
+                    programme: { [Op.iLike]: programme }
                 }
             });
-            if (programme_match) throw new createError.Conflict(
+            if (programmeMatch) throw new createError.Conflict(
                 'programme already exists!'
             );
 
-            const programme = await KeyProgramme.create({ 
-                accountId, programme: req.body.programme 
+            let savedProgramme = await KeyProgramme.create({ 
+                accountId, programme
             });
-            const savedProgramme = programme.toJSON();
+            savedProgramme = programme.toJSON();
             delete savedProgramme.accountId;
 
             res.send(savedProgramme);
@@ -51,7 +52,7 @@ module.exports = {
             const { id } = req.params;
             const { programme } = req.body;
 
-            const programme_match = await KeyProgramme.findOne({
+            const programmeMatch = await KeyProgramme.findOne({
                 attributes: ['id'],
                 where: {
                     accountId,
@@ -59,7 +60,7 @@ module.exports = {
                     programme: { [Op.iLike]: programme }
                 }
             });
-            if (programme_match) throw new createError.Conflict(
+            if (programmeMatch) throw new createError.Conflict(
                 'programme already exists!'
             );
 

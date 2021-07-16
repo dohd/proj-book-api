@@ -23,7 +23,7 @@ module.exports = {
             let savedProgramme = await KeyProgramme.create({ 
                 accountId, programme
             });
-            savedProgramme = programme.toJSON();
+            savedProgramme = savedProgramme.toJSON();
             delete savedProgramme.accountId;
 
             res.send(savedProgramme);

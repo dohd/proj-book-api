@@ -9,13 +9,14 @@ module.exports = {
             const accountId = req.payload.aud;
             const { area } = req.body;
 
-            const region_match = await Region.findOne({
+            const regionMatch = await Region.findOne({
+                attributes: ['id'],
                 where: {
                     accountId,
                     area: { [Op.iLike]: area }
                 }
             });
-            if (region_match) throw new createError.Conflict(
+            if (regionMatch) throw new createError.Conflict(
                 'region already exists!'
             );
 
@@ -49,14 +50,14 @@ module.exports = {
             const { id } = req.params;
             const { area } = req.body;
 
-            const region_match = await Region.findOne({
+            const regionMatch = await Region.findOne({
                 where: {
                     accountId,
                     id: { [Op.ne]: id },
                     area: { [Op.iLike]: area }
                 }
             });
-            if (region_match) throw new createError.Conflict(
+            if (regionMatch) throw new createError.Conflict(
                 'region already exists!'
             );
 

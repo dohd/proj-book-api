@@ -1,7 +1,7 @@
-const { Op } = require('../utils/database');
 const moment = require('moment');
-const { Participant } = require('../models/Participant');
-const { Region } = require('../models/Essential');
+const { QueryTypes } = require('sequelize');
+
+const { db } = require('../utils/database');
 
 module.exports = {
     findAll: async (req, res, next) => {
@@ -9,47 +9,33 @@ module.exports = {
             const accountId = req.payload.aud;
 
             const yr = new Date().getFullYear();
-            const jan = new Date(yr, 0, 1);
-            const dec = new Date(yr, 11, 31);
-            const yr_range = [jan, dec].map(v => {
-                return  moment(v).format('YYYY-MM-DD');
+            const dates = [
+                new Date(yr, 0, 1), 
+                new Date(yr, 11, 31)
+            ].map(v => moment(v).format('YYYY-MM-DD'));
+            const fromDate = req.query.from || dates[0];
+            const toDate = req.query.to || dates[1];
+            
+            // participants count per region
+            const queryStr = `
+                SELECT
+                    r.id,
+                    r.area,
+                    SUM(CASE WHEN p.gender = 'M' THEN 1 ELSE 0 END) male,
+                    SUM(CASE WHEN p.gender = 'F' THEN 1 ELSE 0 END) female,
+                    COUNT(p."regionId") total
+                FROM regions r
+                INNER JOIN participants p
+                    ON r.id = p."regionId"
+                WHERE p."activityDate" BETWEEN :fromDate AND :toDate
+                AND r."accountId" = :accountId
+                GROUP BY r.id
+            `;
+
+            const dataset = await db.query(queryStr, {
+                replacements: {accountId, fromDate, toDate},
+                type: QueryTypes.SELECT
             });
-
-            const fromDate = req.query.from || yr_range[0];
-            const toDate = req.query.to || yr_range[1];
-
-            const participants = await Participant.findAll({
-                where: { 
-                    accountId,
-                    activityDate: {
-                        [Op.between]: [fromDate, toDate]
-                    }
-                },
-                attributes: ['id','gender','regionId']
-            });
-
-            const regions = await Region.findAll({
-                where: { accountId },
-                attributes: ['id']
-            });
-
-            const dataset = { male: [], female: [] };
-
-            for (const region of regions) {
-                let maleCount = 0;
-                let femaleCount = 0;
-
-                for (const p of participants) {
-                    const region_match = p.regionId === region.id;
-                    if (region_match ) {
-                        if (p.gender === 'M') maleCount++;
-                        if (p.gender === 'F') femaleCount++;
-                    }
-                }
-                dataset.male.push(maleCount);
-                dataset.female.push(femaleCount);
-            }
-
             res.send(dataset);
         } catch (error) {
             next(error);

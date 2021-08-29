@@ -19,24 +19,27 @@ module.exports = {
             // participants count per programme
             const queryStr = `
                 SELECT
-                    prog.id,
-                    prog.programme,
-                    SUM(CASE WHEN p.gender = 'M' THEN 1 ELSE 0 END) male,
-                    SUM(CASE WHEN p.gender = 'F' THEN 1 ELSE 0 END) female,
-                    COUNT(p."keyProgrammeId") total
-                FROM key_programmes prog
-                INNER JOIN participants p
-                    ON prog.id = p."keyProgrammeId"
-                WHERE p."activityDate" BETWEEN :fromDate AND :toDate
-                AND prog."accountId" = :accountId
-                GROUP BY prog.id
+                    json_agg(g.programme) AS label,
+                    json_agg(g.male) AS male,
+                    json_agg(g.female) AS female
+                FROM
+                    (SELECT
+                        prog.id,
+                        prog.programme,
+                        SUM(CASE WHEN p.gender = 'M' THEN 1 ELSE 0 END) AS male,
+                        SUM(CASE WHEN p.gender = 'F' THEN 1 ELSE 0 END) AS female
+                    FROM key_programmes AS prog
+                    INNER JOIN participants AS p
+                        ON prog.id = p."keyProgrammeId"
+                    WHERE p."activityDate" BETWEEN :fromDate AND :toDate
+                    AND prog."accountId" = :accountId
+                    GROUP BY prog.id) AS g;
             `;
-
-            const dataset = await db.query(queryStr, {
+            const data = await db.query(queryStr, {
                 replacements: {accountId, fromDate, toDate},
                 type: QueryTypes.SELECT
             });
-            res.send(dataset);
+            res.send(data);
         } catch (error) {
             next(error);
         }

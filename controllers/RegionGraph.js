@@ -16,27 +16,30 @@ module.exports = {
             const fromDate = req.query.from || dates[0];
             const toDate = req.query.to || dates[1];
             
-            // participants count per region
+            // participant count per region
             const queryStr = `
                 SELECT
-                    r.id,
-                    r.area,
-                    SUM(CASE WHEN p.gender = 'M' THEN 1 ELSE 0 END) male,
-                    SUM(CASE WHEN p.gender = 'F' THEN 1 ELSE 0 END) female,
-                    COUNT(p."regionId") total
-                FROM regions r
-                INNER JOIN participants p
-                    ON r.id = p."regionId"
-                WHERE p."activityDate" BETWEEN :fromDate AND :toDate
-                AND r."accountId" = :accountId
-                GROUP BY r.id
+                    json_agg(g.area) AS label,
+                    json_agg(g.male) AS male,
+                    json_agg(g.female) AS female
+                FROM
+                    (SELECT
+                        r.id,
+                        r.area,
+                        SUM(CASE WHEN p.gender = 'M' THEN 1 ELSE 0 END) AS male,
+                        SUM(CASE WHEN p.gender = 'F' THEN 1 ELSE 0 END) AS female
+                    FROM regions AS r
+                    INNER JOIN participants AS p
+                        ON r.id = p."regionId"
+                    WHERE p."activityDate" BETWEEN :fromDate AND :toDate
+                    AND r."accountId" = :accountId
+                    GROUP BY r.id) AS g;
             `;
-
-            const dataset = await db.query(queryStr, {
+            const data = await db.query(queryStr, {
                 replacements: {accountId, fromDate, toDate},
                 type: QueryTypes.SELECT
             });
-            res.send(dataset);
+            res.send(data);
         } catch (error) {
             next(error);
         }

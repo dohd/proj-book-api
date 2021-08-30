@@ -10,7 +10,7 @@ FROM
         act.id,
         act.action,
         pe.date,
-        (CAST(MAX(pe.date) AS date) - CAST(MIN(NOW()) AS date)) as datediff
+        EXTRACT(DAY FROM pe.date::TIMESTAMP - NOW()::TIMESTAMP) AS datediff
     FROM activities AS act
     INNER JOIN activity_plans AS ap
         ON act.id = ap."activityId"

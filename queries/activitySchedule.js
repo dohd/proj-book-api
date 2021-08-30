@@ -19,6 +19,6 @@ FROM
     WHERE pe.date BETWEEN :fromDate AND :toDate	
     AND act."accountId" = :accountId
     GROUP BY act.id, pe.date) AS q
-WHERE q.datediff > 0 AND q.datediff <= 30
+WHERE q.datediff BETWEEN 1 AND 30
 GROUP BY q.id, q.action;
 `;

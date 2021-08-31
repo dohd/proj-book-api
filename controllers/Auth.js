@@ -95,33 +95,31 @@ module.exports = {
                 'Email or password is required!'
             ); 
             
-            // Login
             const login = await Login.findOne({ 
                 where: { email }, attributes: ['userId','password']
             });
-            if(!login) throw new createError.Unauthorized(
+            if (login) {
+                const isValid = await login.isValidPassword(password);
+                if (isValid) {
+                    const user = await User.findByPk(login.userId, { 
+                        attributes: ['accountId','id','roleId'],
+                    });
+            
+                    const accessToken = await signAccessToken(user);
+                    const refreshToken = await signRefreshToken(user);
+        
+                    res.cookie('refreshToken', refreshToken, { 
+                        httpOnly: true,
+                        secure: true,
+                        sameSite: 'none' 
+                    });
+                    return res.send({ accessToken });
+                }
+            }
+            
+            throw new createError.Unauthorized(
                 'Email or password is invalid!'
             );
-    
-            const isValid = await login.isValidPassword(password);
-            if (!isValid) throw new createError.Unauthorized(
-                'Email or password is invalid!'
-            );
-
-            // User
-            const user = await User.findByPk(login.userId, { 
-                attributes: ['accountId','id','roleId'],
-            });
-    
-            const accessToken = await signAccessToken(user);
-            const refreshToken = await signRefreshToken(user);
-
-            res.cookie('refreshToken', refreshToken, { 
-                httpOnly: true,
-                secure: true,
-                sameSite: 'none' 
-            });
-            res.send({ accessToken });
         } catch (err) {
             next(err);
         }

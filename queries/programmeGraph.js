@@ -1,9 +1,9 @@
 // participants count per programme
 module.exports = `
 SELECT
-    json_agg(g.programme) AS label,
-    json_agg(g.male) AS male,
-    json_agg(g.female) AS female
+    JSON_AGG(g.programme) AS label,
+    JSON_AGG(g.male) AS male,
+    JSON_AGG(g.female) AS female
 FROM
     (SELECT
         prog.id,

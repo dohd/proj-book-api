@@ -1,9 +1,9 @@
 // participant count per region
 module.exports = `
 SELECT
-    json_agg(g.area) AS label,
-    json_agg(g.male) AS male,
-    json_agg(g.female) AS female
+    JSON_AGG(g.area) AS label,
+    JSON_AGG(g.male) AS male,
+    JSON_AGG(g.female) AS female
 FROM
     (SELECT
         r.id,

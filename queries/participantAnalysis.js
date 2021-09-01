@@ -1,10 +1,9 @@
 // participant analysis
 module.exports = `
 WITH 
-    t1 AS
-    (
-        -- Participants count per activity
-        SELECT 
+    -- Participants count per activity
+    t1 AS   
+        (SELECT 
             act.id,
             act.action,
             SUM(CASE WHEN p.gender = 'M' THEN 1 ELSE 0 END) AS male,
@@ -14,12 +13,11 @@ WITH
         INNER JOIN participants AS p
             ON act.id = p."activityId"
         WHERE act."accountId" = :accountId
-        GROUP BY act.id
-    ),
-    t2 AS
-    (
-        -- Distinct activities per participant programme
-        SELECT 
+        GROUP BY act.id),
+
+    -- Distinct activities per participant programme
+    t2 AS    
+        (SELECT
             q.id,
             JSON_AGG(q.programme) AS programme	
         FROM
@@ -32,12 +30,11 @@ WITH
             INNER JOIN key_programmes AS prog
                 ON prog.id = p."keyProgrammeId"
             WHERE act."accountId" = :accountId) AS q
-        GROUP BY q.id
-    ),
-    t3 AS
-    (
-        -- Distinct regions per participant activity
-        SELECT 
+        GROUP BY q.id),
+    
+    -- Distinct regions per participant activity
+    t3 AS   
+        (SELECT 
             q.id,
             JSON_AGG(q.area) AS area
         FROM
@@ -50,12 +47,11 @@ WITH
             INNER JOIN regions AS r
                 ON r.id = p."regionId"
             WHERE act."accountId" = :accountId) AS q
-        GROUP BY q.id
-    ),
+        GROUP BY q.id),
+    
+    -- Distinct groups per participant activity
     t4 AS
-    (
-        -- Distinct groups per participant activity
-        SELECT
+        (SELECT
             q.id,
             JSON_AGG(q.group) AS "group"
         FROM
@@ -70,12 +66,11 @@ WITH
             INNER JOIN target_groups AS tar_grp
                 ON tar_grp.id = plan_grp."targetGroupId"
             WHERE act."accountId" = :accountId) AS q
-        GROUP BY q.id
-    ),
+        GROUP BY q.id), 
+    
+    -- Distinct activity dates per participant activity
     t5 AS
-    (
-        -- Distinct activity dates per participant activity
-        SELECT 
+        (SELECT 
             q.id,
             JSON_AGG(q.activity_date) AS activity_date
         FROM
@@ -86,8 +81,9 @@ WITH
             INNER JOIN participants p
                 ON act.id = p."activityId"
             WHERE act."accountId" = :accountId) AS q
-        GROUP BY q.id
-    )
+        GROUP BY q.id)
+        
+-- Analysis    
 SELECT
     t1.id,
     t1.action,

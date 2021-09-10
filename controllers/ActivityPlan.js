@@ -1,14 +1,15 @@
-const { db } = require('../utils/database');
 const createError = require('http-errors');
-const Activity = require('../models/Activity');
+const { QueryTypes } = require('sequelize');
+
+const { db } = require('../utils/database');
+
+const queryStr = require('../queries/activityPlan');
+
 const { Participant } = require('../models/Participant');
 const {
     ActivityPlan, PlanRegion, PlanEvent, PlanGroup, 
     PlanProgramme, PlanMaterial
 } = require('../models/ActivityPlan');
-const { 
-    TargetGroup, KeyProgramme, Region 
-} = require('../models/Essential');
 
 module.exports = {
     create: async (req, res, next) => {
@@ -99,59 +100,12 @@ module.exports = {
     findAll: async (req, res, next) => {
         try {
             const accountId = req.payload.aud;
-            const activity_plans = await ActivityPlan.findAll({
-                where: { accountId },
-                attributes: ['id','title'],
-                include: [
-                    {
-                        model: Activity,
-                        as: 'activity',
-                        attributes: ['id', 'action']
-                    },
-                    {
-                        model: PlanMaterial,
-                        as: 'planMaterial',
-                        attributes: ['id', 'material']
-                    },
-                    {
-                        model: PlanProgramme,
-                        as: 'planProgramme',
-                        attributes: ['id'],
-                        include: [{
-                            model: KeyProgramme,
-                            as: 'keyProgramme',
-                            attributes: ['id','programme']
-                        }]
-                    },
-                    {
-                        model: PlanGroup,
-                        as: 'planGroups',
-                        attributes: ['id'],
-                        include: [{
-                            model: TargetGroup,
-                            as: 'targetGroup',
-                            attributes: ['id','group']
-                        }]
-                    },
-                    {
-                        model: PlanEvent,
-                        as: 'planEvents',
-                        attributes: ['id','date'],
-                        include: [{
-                            model: PlanRegion,
-                            as: 'planRegions',
-                            attributes: ['id'],
-                            include: [{
-                                model: Region,
-                                as: 'region',
-                                attributes: ['id','area']
-                            }]
-                        }]
-                    }
-                ]
+
+            const data = await db.query(queryStr, {
+                replacements: {accountId},
+                type: QueryTypes.SELECT
             });
-            
-            res.send(activity_plans);
+            res.send(data);
         } catch (error) {
             next(error);
         }

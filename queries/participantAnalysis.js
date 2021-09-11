@@ -14,7 +14,6 @@ WITH
             ON act.id = p."activityId"
         WHERE act."accountId" = :accountId
         GROUP BY act.id),
-
     -- Distinct activities per participant programme
     t2 AS    
         (SELECT
@@ -31,7 +30,6 @@ WITH
                 ON prog.id = p."keyProgrammeId"
             WHERE act."accountId" = :accountId) AS q
         GROUP BY q.id),
-    
     -- Distinct regions per participant activity
     t3 AS   
         (SELECT 
@@ -48,7 +46,6 @@ WITH
                 ON r.id = p."regionId"
             WHERE act."accountId" = :accountId) AS q
         GROUP BY q.id),
-    
     -- Distinct groups per participant activity
     t4 AS
         (SELECT
@@ -67,7 +64,6 @@ WITH
                 ON tar_grp.id = plan_grp."targetGroupId"
             WHERE act."accountId" = :accountId) AS q
         GROUP BY q.id), 
-    
     -- Distinct activity dates per participant activity
     t5 AS
         (SELECT 
@@ -81,8 +77,8 @@ WITH
             INNER JOIN participants p
                 ON act.id = p."activityId"
             WHERE act."accountId" = :accountId) AS q
-        GROUP BY q.id)
-        
+        GROUP BY q.id)  
+           
 -- Analysis    
 SELECT
     t1.id,

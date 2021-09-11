@@ -100,12 +100,11 @@ module.exports = {
     findAll: async (req, res, next) => {
         try {
             const accountId = req.payload.aud;
-
-            const data = await db.query(queryStr, {
-                replacements: {accountId},
-                type: QueryTypes.SELECT
+            const activityPlans = await ActivityPlan.findAll({
+                where: {accountId},
+                attributes: {exclude: ['accountId']}
             });
-            res.send(data);
+            res.send(activityPlans);
         } catch (error) {
             next(error);
         }

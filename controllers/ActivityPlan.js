@@ -1,9 +1,6 @@
 const createError = require('http-errors');
-const { QueryTypes } = require('sequelize');
 
 const { db } = require('../utils/database');
-
-const queryStr = require('../queries/activityPlan');
 
 const { Participant } = require('../models/Participant');
 const {

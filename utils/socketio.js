@@ -21,6 +21,7 @@ const socketEvents = [
     'proposals',
     'agenda',
     'activityPlans',
+    'eventPlans',
     'narratives',
     'users',
 ];

@@ -18,6 +18,7 @@ router.use('/objectives', require('./objective'));
 router.use('/activities', require('./activity'));
 
 router.use('/activity-plans', require('./activityPlan'));
+router.use('/event-plans', require('./eventPlan'));
 router.use('/participants', require('./participant'));
 router.use('/agenda', require('./agenda'));
 

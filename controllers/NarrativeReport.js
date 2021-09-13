@@ -57,37 +57,39 @@ module.exports = {
 
             const activityReports = await Activity.findAll({
                 where: { accountId },
-                attributes: ['id','action'],
+                attributes: [['id','key'],['action','activity']],
                 order: [['updatedAt', 'DESC']],
                 include: [
                     {
                         model: NarrativeReport,
                         as: 'narratives',
+                        attributes: [['id','key'],'title','activityId'],
                         required: true,
                         include: [
                             {
                                 model: CaseStudy,
                                 as: 'caseStudy',
-                                attributes: ['id','case']
+                                attributes: [['id','key'],'case']
                             },
                             {
                                 model: EventImage,
                                 as: 'eventImages',
-                                attributes: ['id','url']
+                                attributes: [['id','key'],'url']
                             },
                             {
                                 model: Response,
                                 as: 'responses',
-                                attributes: ['id','response'],
+                                attributes: [['id','key'],'response'],
                                 include: [
                                     {
                                         model: Agenda,
                                         as: 'agenda',
-                                        attributes: ['id','task']
+                                        attributes: [['id','key'],'task']
                                     },
                                     {
                                         model: NarrativeQuiz,
-                                        as: 'narrativeQuiz'
+                                        as: 'narrativeQuiz',
+                                        attributes: [['id','key'],'query']
                                     }
                                 ]
                             }

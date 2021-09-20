@@ -1,11 +1,10 @@
-const { db } = require('../utils/database');
-const { 
-    NarrativeReport, Response, CaseStudy,
-    NarrativeQuiz, EventImage
-} = require('../models/NarrativeReport');
-const Agenda = require('../models/Agenda');
-const Activity = require('../models/Activity');
+const { QueryTypes } = require('sequelize');
 
+const { db } = require('../utils/database');
+
+const { NarrativeReport, Response, CaseStudy } = require('../models/NarrativeReport');
+const queryStr = require('../queries/activityReport');
+const hello = 'hello';
 module.exports = {
     create: async (req, res, next) => {
         try {
@@ -55,50 +54,11 @@ module.exports = {
         try {
             const accountId = req.payload.aud;
 
-            const activityReports = await Activity.findAll({
-                where: { accountId },
-                attributes: [['id','key'],['action','activity']],
-                order: [['updatedAt', 'DESC']],
-                include: [
-                    {
-                        model: NarrativeReport,
-                        as: 'narratives',
-                        attributes: [['id','key'],'title','activityId'],
-                        required: true,
-                        include: [
-                            {
-                                model: CaseStudy,
-                                as: 'caseStudy',
-                                attributes: [['id','key'],'case']
-                            },
-                            {
-                                model: EventImage,
-                                as: 'eventImages',
-                                attributes: [['id','key'],'url']
-                            },
-                            {
-                                model: Response,
-                                as: 'responses',
-                                attributes: [['id','key'],'response'],
-                                include: [
-                                    {
-                                        model: Agenda,
-                                        as: 'agenda',
-                                        attributes: [['id','key'],'task']
-                                    },
-                                    {
-                                        model: NarrativeQuiz,
-                                        as: 'narrativeQuiz',
-                                        attributes: [['id','key'],'query']
-                                    }
-                                ]
-                            }
-                        ]    
-                    }
-                ]
+            const data = await db.query(queryStr, {
+                replacements: {accountId},
+                type: QueryTypes.SELECT
             });
-
-            res.send(activityReports);
+            res.send(data);
         } catch (error) {
             next(error);
         }

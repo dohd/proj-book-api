@@ -2,7 +2,7 @@ const { QueryTypes } = require('sequelize');
 
 const { db } = require('../utils/database');
 
-const queryStr = require('../queries/activityPlan');
+const queryStr = require('../queries/eventPlan');
 
 module.exports = {
     findAll: async (req, res, next) => {

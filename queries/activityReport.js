@@ -17,7 +17,8 @@ WITH
 				ON repo."activityId" = act.id
 			INNER JOIN participants AS part
 				ON part."activityId" = act.id
-			WHERE act."accountId" = :accountId) AS q
+			WHERE act."accountId" = :accountId
+			AND part."activityDate" BETWEEN :from AND :to) AS q
 		GROUP BY q.id, q.action),
 	-- Activity programmes
 	t2 AS
@@ -35,7 +36,8 @@ WITH
 				ON part."activityId" = act.id
 			INNER JOIN key_programmes AS kprog
 				ON kprog.id = part."keyProgrammeId"
-			WHERE act."accountId" = :accountId) AS q
+			WHERE act."accountId" = :accountId 
+			AND kprog.id = COALESCE(:programmeId, kprog.id)) AS q
 		GROUP BY q.id),
 	-- Activity regions
 	t3 AS
@@ -53,7 +55,8 @@ WITH
 				ON part."activityId" = act.id
 			INNER JOIN regions AS r
 				ON r.id = part."regionId"
-			WHERE act."accountId" = :accountId) AS q
+			WHERE act."accountId" = :accountId
+			AND r.id = COALESCE(:regionId, r.id)) AS q
 		GROUP BY q.id),
 	-- Activity groups
 	t4 AS
@@ -75,7 +78,8 @@ WITH
 				ON pgroup."activityPlanId" = actp.id
 			INNER JOIN target_groups AS tgroup
 				ON tgroup.id = pgroup."targetGroupId"
-			WHERE act."accountId" = :accountId) AS q
+			WHERE act."accountId" = :accountId
+			AND tgroup.id = COALESCE(:groupId, tgroup.id)) AS q
 		GROUP BY q.id),
 	-- Quiz responses
 	t5 AS

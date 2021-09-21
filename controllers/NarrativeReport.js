@@ -3,7 +3,7 @@ const moment = require('moment');
 
 const { db } = require('../utils/database');
 
-const queryStr = require('../queries/activityReport');
+const queryStr = require('../queries/narrativeReport');
 const { NarrativeReport, Response, CaseStudy } = require('../models/NarrativeReport');
 
 module.exports = {

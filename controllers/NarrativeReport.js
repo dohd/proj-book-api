@@ -1,10 +1,11 @@
 const { QueryTypes } = require('sequelize');
+const moment = require('moment');
 
 const { db } = require('../utils/database');
 
-const { NarrativeReport, Response, CaseStudy } = require('../models/NarrativeReport');
 const queryStr = require('../queries/activityReport');
-const hello = 'hello';
+const { NarrativeReport, Response, CaseStudy } = require('../models/NarrativeReport');
+
 module.exports = {
     create: async (req, res, next) => {
         try {
@@ -54,8 +55,28 @@ module.exports = {
         try {
             const accountId = req.payload.aud;
 
+            for (const key in req.query) {
+                if (req.query[key] === 'undefined') {
+                    req.query[key] = null;
+                }
+            }
+
+            const yr = new Date().getFullYear();
+            const dates = [
+                new Date(yr, 0, 1), 
+                new Date(yr, 11, 31)
+            ].map(v => moment(v).format('YYYY-MM-DD'));
+
+            const params = {
+                programmeId: req.query.programme || null,
+                regionId: req.query.region || null,
+                groupId: req.query.group || null,
+                from: req.query.from || dates[0],
+                to: req.query.to || dates[1]
+            };
+
             const data = await db.query(queryStr, {
-                replacements: {accountId},
+                replacements: {accountId, ...params},
                 type: QueryTypes.SELECT
             });
             res.send(data);

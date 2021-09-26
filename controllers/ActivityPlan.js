@@ -1,6 +1,9 @@
 const createError = require('http-errors');
+const { QueryTypes } = require('sequelize');
 
 const { db } = require('../utils/database');
+
+const queryStr = require('../queries/activityPlan');
 
 const { Participant } = require('../models/Participant');
 const {
@@ -97,11 +100,12 @@ module.exports = {
     findAll: async (req, res, next) => {
         try {
             const accountId = req.payload.aud;
-            const activityPlans = await ActivityPlan.findAll({
-                where: {accountId},
-                attributes: {exclude: ['accountId']}
+
+            const data = await db.query(queryStr, {
+                replacements: {accountId},
+                type: QueryTypes.SELECT
             });
-            res.send(activityPlans);
+            res.send(data);
         } catch (error) {
             next(error);
         }

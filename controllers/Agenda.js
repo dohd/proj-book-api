@@ -9,6 +9,14 @@ module.exports = {
             const data = req.body;
             const { activityId } = data;
 
+            const agendaCount = await Agenda.count({
+                where: {accountId, activityId}
+            });
+
+            if (agendaCount >= 10) throw new createError.BadRequest(
+                'Agenda limit is 10!'
+            );
+
             const isMatch = await Agenda.findOne({
                 attributes: ['id'],
                 where: {

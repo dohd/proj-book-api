@@ -30,7 +30,7 @@ module.exports = {
 
     delete: async (req, res, next) => {
         try {
-            const { id } = req.params;
+            const { id } = req.params;            
             await Response.destroy({ where: { id } });
             res.sendStatus(204);
         } catch (error) {

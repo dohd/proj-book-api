@@ -29,7 +29,12 @@ module.exports = {
     update: async (req, res, next) => {
         try {
             const { id } = req.params;
-            await CaseStudy.update(req.body, { where: { id } });
+            // await CaseStudy.update(req.body, { where: { id } });
+
+            // update based on report id;
+            await CaseStudy.update({case: req.body['caseStudy']}, { 
+                where: { narrativeReportId: id } 
+            });
             res.sendStatus(200);
         } catch (error) {
             next(error);
